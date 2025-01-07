@@ -2,6 +2,10 @@
 
 A friendly tool to help recover deleted Git commits safely and conveniently.
 
+![Help banner](images/help_option_reset.png)
+![Option Reset](images/option_reset.png)
+![Option Reset Result](images/option_reset_result.png)
+
 ## Installation
 
 Install the gem by running:
@@ -89,3 +93,7 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/rubyka
 ## License
 
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+
+## Logo
+
+![Logo](images/logo.jpeg)
