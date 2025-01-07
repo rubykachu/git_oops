@@ -35,7 +35,8 @@ module GitOops
         current_commit = `git rev-parse HEAD`.strip
         current_branch = `git rev-parse --abbrev-ref HEAD`.strip
 
-        command = "git reflog --format='%h %gd %gs'"
+        # Use a more detailed format that includes the full reflog information
+        command = %Q{git reflog --format="%h (%gD) %gs"}
         command += " | grep -i '#{search}'" if search
         command += " | head -n #{limit}"
 
@@ -43,19 +44,27 @@ module GitOops
         commits = result.split("\n")
 
         # Mark current commit and format like git reflog
-        commits.map.with_index do |commit, index|
-          parts = commit.split(" ")
+        commits.map do |commit|
+          # Split by first space to get hash, then by closing parenthesis to get ref
+          parts = commit.split(" ", 2)
           hash = parts[0]
-          ref = parts[1]
-          message = parts[2..-1].join(" ")
+          rest = parts[1]
 
-          formatted_commit = if hash == current_commit
-            "#{hash} (#{@pastel.green("HEAD -> #{current_branch}")}) #{ref}: #{message}"
+          # Extract ref and message
+          ref_start = rest.index("(") + 1
+          ref_end = rest.index(")")
+          ref = rest[ref_start...ref_end]
+          message = rest[ref_end + 2..-1]
+
+          # Format the commit line
+          commit_line = if hash == current_commit
+            head_info = @pastel.green("HEAD -> #{current_branch}")
+            "#{hash} (#{head_info}, #{ref}) #{message}"
           else
-            "#{hash} #{ref}: #{message}"
+            "#{hash} (#{ref}) #{message}"
           end
 
-          [formatted_commit, hash]
+          [commit_line, hash]
         end
       end
 
