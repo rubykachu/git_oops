@@ -13,6 +13,9 @@ module GitOops
       end
 
       def execute
+        display_current_log
+        puts "\n#{@pastel.blue('ℹ')} Above is your current git log. Below are all available commits from git reflog:\n\n"
+
         commits = fetch_commits
         return if commits.empty?
 
@@ -28,6 +31,16 @@ module GitOops
       end
 
       private
+
+      def display_current_log
+        puts @pastel.cyan("Current Git Log:")
+        puts @pastel.cyan("---------------")
+
+        command = %Q{git log --oneline --decorate --color=always | head -n 10}
+        log_output = `#{command}`
+
+        puts log_output
+      end
 
       def fetch_commits
         limit = @options[:limit] || 20
