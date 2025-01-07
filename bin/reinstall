@@ -1,0 +1,16 @@
+#!/bin/bash
+
+echo "🔄 Reinstalling git_oops gem..."
+
+# Uninstall all versions of the gem
+echo "🗑️  Removing old versions..."
+gem uninstall git_oops -a -x
+
+# Build and install the new version
+echo "🔨 Building new version..."
+rake build
+
+echo "📦 Installing new version..."
+gem install pkg/git_oops-*.gem
+
+echo "✨ Reinstallation complete!"
