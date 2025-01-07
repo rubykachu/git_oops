@@ -33,22 +33,29 @@ module GitOops
         limit = @options[:limit] || 20
         search = @options[:search]
         current_commit = `git rev-parse HEAD`.strip
+        current_branch = `git rev-parse --abbrev-ref HEAD`.strip
 
-        command = "git reflog --format='%h - %s [%ar]'"
+        command = "git reflog --format='%h %gd %gs'"
         command += " | grep -i '#{search}'" if search
         command += " | head -n #{limit}"
 
         result = `#{command}`
         commits = result.split("\n")
 
-        # Mark current commit
+        # Mark current commit and format like git reflog
         commits.map.with_index do |commit, index|
-          hash = commit.split(" ").first
-          if hash == current_commit
-            ["#{commit} #{@pastel.green('(current)')} [#{index + 1}/#{commits.length}]", hash]
+          parts = commit.split(" ")
+          hash = parts[0]
+          ref = parts[1]
+          message = parts[2..-1].join(" ")
+
+          formatted_commit = if hash == current_commit
+            "#{hash} (#{@pastel.green("HEAD -> #{current_branch}")}) #{ref}: #{message}"
           else
-            ["#{commit} [#{index + 1}/#{commits.length}]", hash]
+            "#{hash} #{ref}: #{message}"
           end
+
+          [formatted_commit, hash]
         end
       end
 
