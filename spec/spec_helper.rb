@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require "git_oops"
+require "fileutils"
+require "tmpdir"
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
@@ -11,5 +13,17 @@ RSpec.configure do |config|
 
   config.expect_with :rspec do |c|
     c.syntax = :expect
+  end
+
+  # Setup test git repository
+  config.around(:each) do |example|
+    Dir.mktmpdir do |dir|
+      Dir.chdir(dir) do
+        system("git init --quiet")
+        system("git config --local user.name 'Test User'")
+        system("git config --local user.email 'test@example.com'")
+        example.run
+      end
+    end
   end
 end
