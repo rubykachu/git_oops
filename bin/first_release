@@ -56,12 +56,7 @@ echo -e "\n${GREEN}Publishing to RubyGems...${NC}"
 if [ -n "$OTP_CODE" ]; then
   gem push "git_oops-0.1.0.gem" --otp "$OTP_CODE"
 else
-  # Try without OTP first
-  if ! gem push "git_oops-0.1.0.gem" 2>/dev/null; then
-    echo -e "\n${YELLOW}OTP required. Please run:${NC}"
-    echo -e "${GREEN}bin/first_release --otp [your_code]${NC}"
-    exit 1
-  fi
+  gem push "git_oops-0.1.0.gem"
 fi
 
 # Cleanup
