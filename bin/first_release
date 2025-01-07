@@ -28,6 +28,18 @@ done
 
 echo -e "${YELLOW}Starting first release process...${NC}"
 
+# Get current version
+VERSION=$(ruby -r "./lib/git_oops/version.rb" -e "puts GitOops::VERSION")
+
+# Check if gem already exists on RubyGems
+if gem list -r git_oops | grep -q "^git_oops (${VERSION})"; then
+  echo -e "${RED}Error: Version ${VERSION} already exists on RubyGems!${NC}"
+  echo -e "${YELLOW}Please update the version in lib/git_oops/version.rb before releasing.${NC}"
+  echo -e "Current versions on RubyGems:"
+  gem list -r git_oops
+  exit 1
+fi
+
 # Clean up any existing gem files
 echo -e "\n${GREEN}Cleaning up...${NC}"
 rm -f *.gem
@@ -41,29 +53,29 @@ echo -e "\n${GREEN}Building gem...${NC}"
 gem build git_oops.gemspec
 
 # Handle git tag
-echo -e "\n${GREEN}Handling git tag v0.1.0...${NC}"
+echo -e "\n${GREEN}Handling git tag v${VERSION}...${NC}"
 if [ "$FORCE" = true ]; then
-  echo "Removing existing tag v0.1.0..."
-  git tag -d v0.1.0 2>/dev/null || true
-  git push origin :refs/tags/v0.1.0 2>/dev/null || true
+  echo "Removing existing tag v${VERSION}..."
+  git tag -d "v${VERSION}" 2>/dev/null || true
+  git push origin ":refs/tags/v${VERSION}" 2>/dev/null || true
 fi
 
-git tag -a "v0.1.0" -m "First release version 0.1.0"
-git push origin "v0.1.0"
+git tag -a "v${VERSION}" -m "Release version ${VERSION}"
+git push origin "v${VERSION}"
 
 # Publish to RubyGems
 echo -e "\n${GREEN}Publishing to RubyGems...${NC}"
 if [ -n "$OTP_CODE" ]; then
-  gem push "git_oops-0.1.0.gem" --otp "$OTP_CODE"
+  gem push "git_oops-${VERSION}.gem" --otp "$OTP_CODE"
 else
-  gem push "git_oops-0.1.0.gem"
+  gem push "git_oops-${VERSION}.gem"
 fi
 
 # Cleanup
 echo -e "\n${GREEN}Cleaning up...${NC}"
-rm "git_oops-0.1.0.gem"
+rm "git_oops-${VERSION}.gem"
 
-echo -e "\n${GREEN}First release v0.1.0 completed successfully!${NC}"
+echo -e "\n${GREEN}Release v${VERSION} completed successfully!${NC}"
 echo -e "\nNext steps:"
 echo -e "1. Update CHANGELOG.md"
 echo -e "2. Push changes to GitHub: ${GREEN}git push origin main${NC}"
