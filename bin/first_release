@@ -15,6 +15,10 @@ while [[ $# -gt 0 ]]; do
       OTP_CODE="$2"
       shift 2
       ;;
+    --force)
+      FORCE=true
+      shift
+      ;;
     *)
       echo -e "${RED}Unknown option: $1${NC}"
       exit 1
@@ -36,8 +40,14 @@ bundle exec rake spec
 echo -e "\n${GREEN}Building gem...${NC}"
 gem build git_oops.gemspec
 
-# Create git tag
-echo -e "\n${GREEN}Creating git tag v0.1.0...${NC}"
+# Handle git tag
+echo -e "\n${GREEN}Handling git tag v0.1.0...${NC}"
+if [ "$FORCE" = true ]; then
+  echo "Removing existing tag v0.1.0..."
+  git tag -d v0.1.0 2>/dev/null || true
+  git push origin :refs/tags/v0.1.0 2>/dev/null || true
+fi
+
 git tag -a "v0.1.0" -m "First release version 0.1.0"
 git push origin "v0.1.0"
 
