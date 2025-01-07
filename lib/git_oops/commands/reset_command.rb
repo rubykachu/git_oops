@@ -6,6 +6,8 @@ require "pastel"
 module GitOops
   module Commands
     class ResetCommand
+      DEFAULT_LOG_LIMIT = 5
+
       def initialize(options)
         @options = options
         @prompt = TTY::Prompt.new
@@ -36,10 +38,26 @@ module GitOops
         puts @pastel.cyan("Current Git Log:")
         puts @pastel.cyan("---------------")
 
-        command = %Q{git log --oneline --decorate --color=always | head -n 10}
+        # Get total number of commits
+        total_commits = `git rev-list --count HEAD`.strip.to_i
+        log_limit = @options[:log_limit] || DEFAULT_LOG_LIMIT
+
+        # Get current branch name and latest commits
+        current_branch = `git rev-parse --abbrev-ref HEAD`.strip
+        command = %Q{git log --oneline --decorate --color=always -n #{log_limit}}
         log_output = `#{command}`
 
+        # Display branch and commit information
+        puts "#{@pastel.bright_blue('Branch:')} #{current_branch}"
+        puts "#{@pastel.bright_blue('Total commits:')} #{total_commits}"
+        puts "#{@pastel.bright_blue('Latest commits:')} (showing #{[log_limit, total_commits].min} of #{total_commits})"
+        puts "#{@pastel.cyan('─' * 40)}"
         puts log_output
+
+        if total_commits > log_limit
+          remaining = total_commits - log_limit
+          puts @pastel.dim("... and #{remaining} more commits")
+        end
       end
 
       def fetch_commits
