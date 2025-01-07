@@ -51,25 +51,17 @@ fi
 git tag -a "v0.1.0" -m "First release version 0.1.0"
 git push origin "v0.1.0"
 
-# Check if user has RubyGems credentials
-if ! gem owner git_oops &>/dev/null; then
-  echo -e "\n${YELLOW}You need to sign in to RubyGems to publish the gem.${NC}"
-  if [ -z "$OTP_CODE" ]; then
-    echo -e "Please run: ${GREEN}gem signin --otp [your_code]${NC}"
-    echo -e "Or run this script with: ${GREEN}bin/first_release --otp [your_code]${NC}"
-    exit 1
-  else
-    echo -e "\n${GREEN}Signing in to RubyGems with OTP...${NC}"
-    gem signin --otp "$OTP_CODE"
-  fi
-fi
-
 # Publish to RubyGems
 echo -e "\n${GREEN}Publishing to RubyGems...${NC}"
 if [ -n "$OTP_CODE" ]; then
   gem push "git_oops-0.1.0.gem" --otp "$OTP_CODE"
 else
-  gem push "git_oops-0.1.0.gem"
+  # Try without OTP first
+  if ! gem push "git_oops-0.1.0.gem" 2>/dev/null; then
+    echo -e "\n${YELLOW}OTP required. Please run:${NC}"
+    echo -e "${GREEN}bin/first_release --otp [your_code]${NC}"
+    exit 1
+  fi
 fi
 
 # Cleanup
