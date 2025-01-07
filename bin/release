@@ -15,6 +15,10 @@ if [[ -n $(git status -s) ]]; then
   exit 1
 fi
 
+# Clean up any existing gem files
+echo -e "\n${GREEN}Cleaning up...${NC}"
+rm -f *.gem
+
 # Build and test
 echo -e "\n${GREEN}Running tests...${NC}"
 bundle exec rake spec
