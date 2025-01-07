@@ -16,10 +16,15 @@ module GitOops
         commits = fetch_commits
         return if commits.empty?
 
-        selected_commit = select_commit(commits)
-        return unless selected_commit
+        begin
+          selected_commit = select_commit(commits)
+          return unless selected_commit
 
-        handle_restore(selected_commit)
+          handle_restore(selected_commit)
+        rescue TTY::Reader::InputInterrupt
+          puts "\n#{@pastel.blue('ℹ')} Operation cancelled. No changes were made."
+          exit 0
+        end
       end
 
       private
@@ -27,22 +32,50 @@ module GitOops
       def fetch_commits
         limit = @options[:limit] || 20
         search = @options[:search]
+        current_commit = `git rev-parse HEAD`.strip
 
         command = "git reflog --format='%h - %s [%ar]'"
         command += " | grep -i '#{search}'" if search
         command += " | head -n #{limit}"
 
         result = `#{command}`
-        result.split("\n")
+        commits = result.split("\n")
+
+        # Mark current commit
+        commits.map.with_index do |commit, index|
+          hash = commit.split(" ").first
+          if hash == current_commit
+            ["#{commit} #{@pastel.green('(current)')} [#{index + 1}/#{commits.length}]", hash]
+          else
+            ["#{commit} [#{index + 1}/#{commits.length}]", hash]
+          end
+        end
       end
 
       def select_commit(commits)
-        @prompt.select("Select a commit to restore:", commits, per_page: 10)
+        choices = commits.map do |commit_info, hash|
+          { name: commit_info, value: hash }
+        end
+
+        selected = @prompt.select(
+          "Select a commit to restore:",
+          choices,
+          per_page: 10,
+          filter: true,
+          show_help: :always,
+          help: "(Use ↑/↓ to navigate, type to filter)"
+        )
+
+        current_commit = `git rev-parse HEAD`.strip
+        if selected == current_commit
+          puts "\n#{@pastel.blue('ℹ')} Selected commit is the current HEAD. No changes needed."
+          return nil
+        end
+
+        selected
       end
 
-      def handle_restore(commit)
-        hash = commit.split(" ").first
-
+      def handle_restore(hash)
         unless @options[:no_warning]
           return unless confirm_restore
         end
