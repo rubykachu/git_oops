@@ -51,7 +51,7 @@ goops reset --no-warning
 ### Setup Development Environment
 
 ```bash
-git clone https://github.com/TOMOSIA-VIETNAM/git_oops.git
+git clone https://github.com/rubykachu/git_oops.git
 cd git_oops
 bin/setup
 ```
@@ -84,7 +84,7 @@ bin/release
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/TOMOSIA-VIETNAM/git_oops.
+Bug reports and pull requests are welcome on GitHub at https://github.com/rubykachu/git_oops.
 
 ## License
 

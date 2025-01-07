@@ -10,15 +10,15 @@ Gem::Specification.new do |spec|
 
   spec.summary = "A friendly tool to help recover deleted Git commits safely and conveniently"
   spec.description = "git_oops provides an interactive interface to help users recover deleted Git commits safely. It features a user-friendly selection interface, commit preview, and safety measures to prevent data loss."
-  spec.homepage = "https://github.com/TOMOSIA-VIETNAM/git_oops"
+  spec.homepage = "https://github.com/rubykachu/git_oops"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.3.0"
 
   spec.metadata["allowed_push_host"] = "https://rubygems.org"
 
   spec.metadata["homepage_uri"] = spec.homepage
-  spec.metadata["source_code_uri"] = "https://github.com/TOMOSIA-VIETNAM/git_oops"
-  spec.metadata["changelog_uri"] = "https://github.com/TOMOSIA-VIETNAM/git_oops/blob/main/CHANGELOG.md"
+  spec.metadata["source_code_uri"] = "https://github.com/rubykachu/git_oops"
+  spec.metadata["changelog_uri"] = "https://github.com/rubykachu/git_oops/blob/main/CHANGELOG.md"
 
   # Specify which files should be added to the gem when it is released.
   # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
