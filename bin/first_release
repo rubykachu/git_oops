@@ -8,31 +8,25 @@ YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m'
 
-echo -e "${YELLOW}Starting first release process...${NC}"
+# Parse command line arguments
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    --otp)
+      OTP_CODE="$2"
+      shift 2
+      ;;
+    *)
+      echo -e "${RED}Unknown option: $1${NC}"
+      exit 1
+      ;;
+  esac
+done
 
-# Check if working directory is clean
-if [[ -n $(git status -s) ]]; then
-  echo -e "${RED}Error: Working directory is not clean. Please commit all changes first.${NC}"
-  exit 1
-fi
+echo -e "${YELLOW}Starting first release process...${NC}"
 
 # Clean up any existing gem files
 echo -e "\n${GREEN}Cleaning up...${NC}"
 rm -f *.gem
-
-# Reset version to 0.1.0
-echo -e "\n${GREEN}Setting version to 0.1.0...${NC}"
-cat > lib/git_oops/version.rb << EOL
-# frozen_string_literal: true
-
-module GitOops
-  VERSION = "0.1.0"
-end
-EOL
-
-# Commit version change
-git add lib/git_oops/version.rb
-git commit -m "Reset version to 0.1.0 for first release"
 
 # Build and test
 echo -e "\n${GREEN}Running tests...${NC}"
@@ -50,13 +44,23 @@ git push origin "v0.1.0"
 # Check if user has RubyGems credentials
 if ! gem owner git_oops &>/dev/null; then
   echo -e "\n${YELLOW}You need to sign in to RubyGems to publish the gem.${NC}"
-  echo -e "Please run: ${GREEN}gem signin${NC}"
-  exit 1
+  if [ -z "$OTP_CODE" ]; then
+    echo -e "Please run: ${GREEN}gem signin --otp [your_code]${NC}"
+    echo -e "Or run this script with: ${GREEN}bin/first_release --otp [your_code]${NC}"
+    exit 1
+  else
+    echo -e "\n${GREEN}Signing in to RubyGems with OTP...${NC}"
+    gem signin --otp "$OTP_CODE"
+  fi
 fi
 
 # Publish to RubyGems
 echo -e "\n${GREEN}Publishing to RubyGems...${NC}"
-gem push "git_oops-0.1.0.gem"
+if [ -n "$OTP_CODE" ]; then
+  gem push "git_oops-0.1.0.gem" --otp "$OTP_CODE"
+else
+  gem push "git_oops-0.1.0.gem"
+fi
 
 # Cleanup
 echo -e "\n${GREEN}Cleaning up...${NC}"
